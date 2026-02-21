@@ -1,0 +1,39 @@
+plugins {
+    id 'java'
+    id 'war'
+}
+
+group = 'org.andrey20005'
+version = '0.1'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    providedCompile 'jakarta.platform:jakarta.jakartaee-api:10.0.0'
+
+    implementation 'io.jsonwebtoken:jjwt:0.9.1'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2'
+}
+
+tasks.named('war') {
+    doLast {
+        copy {
+            from archiveFile
+            into 'C:\\Users\\andrey\\programing\\wildfly-39.0.1.Final\\standalone\\deployments'
+            rename { fileName ->
+                'web4.war'
+            }
+        }
+        println "WAR скопирован в директорию деплоя"
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
