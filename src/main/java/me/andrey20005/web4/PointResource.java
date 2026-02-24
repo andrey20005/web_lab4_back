@@ -2,9 +2,12 @@ package me.andrey20005.web4;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.SecurityContext;
 import me.andrey20005.web4.Entity.Point;
+import me.andrey20005.web4.repository.UserRepository;
 import me.andrey20005.web4.service.PointService;
 
 import java.util.List;
@@ -17,9 +20,14 @@ public class PointResource {
     @Inject
     private PointService pointService;
 
+    @Inject
+    private UserRepository userRepository;
+
     @GET
-    public List<Point> getAll() {
-        return pointService.findAll();
+    public List<Point> getAll(@Context SecurityContext securityContext) {
+        Long userId = Long.valueOf(securityContext.getUserPrincipal().getName());
+        System.out.println("getAll user = " + userId);
+        return pointService.findByUserId(userId);
     }
 
     @GET
@@ -29,9 +37,11 @@ public class PointResource {
     }
 
     @POST
-    public Response create(Point point) {
-        Point created = pointService.create(point);
-        return Response.status(201).entity(created).build();
+    public Response create(Point point, @Context SecurityContext securityContext) {
+        Long userId = Long.valueOf(securityContext.getUserPrincipal().getName());
+        System.out.println("create user = " + userId);
+        point.setUserId(userId);
+        return Response.status(201).entity(pointService.create(point)).build();
     }
 
     @PUT

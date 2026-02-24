@@ -31,6 +31,9 @@ public class Point implements Serializable {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    @JoinColumn(name = "userId", nullable = false)
+    private Long userId;
+
     public Point() {}
 
     public Point(double x, double y, double r, Area area) {
@@ -71,8 +74,11 @@ public class Point implements Serializable {
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime time) { this.createdAt = time; }
 
+    public Long getUserId() { return userId; }
+    public void setUserId(Long user) { this.userId = user; }
+
     @Override
     public String toString() {
-        return "p: x = " + this.getX() + ", y = " + this.getY() + ", r = " + this.getR() + ", hit = " + this.isHit() + ", time = " + this.getCreatedAt();
+        return "p: x = " + this.getX() + ", y = " + this.getY() + ", r = " + this.getR() + ", hit = " + this.isHit() + ", time = " + this.getCreatedAt() + ", userName = " + this.getUserId();
     }
 }

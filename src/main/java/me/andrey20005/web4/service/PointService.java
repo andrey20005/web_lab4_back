@@ -18,9 +18,9 @@ public class PointService {
     private static final Area area;
     static {
         AndArea quarterCircle = new AndArea(new ArrayList<>());
-        quarterCircle.addArea(new AboveLine(0, 0, 1, 0));
+        quarterCircle.addArea(new AboveLine(0, 0, -1, 0));
         quarterCircle.addArea(new AboveLine(0, 0, 0, 1));
-        quarterCircle.addArea(new Circle(1, 0, 0));
+        quarterCircle.addArea(new Circle(0.5, 0, 0));
         AndArea lowerTriangle = new AndArea(new ArrayList<>());
         lowerTriangle.addArea(new AboveLine(0, 0, 1, 0));
         lowerTriangle.addArea(new AboveLine(0, 0, 0, -1));
@@ -28,8 +28,8 @@ public class PointService {
         AndArea rectangle = new AndArea(new ArrayList<>());
         rectangle.addArea(new AboveLine(0, 0, -1, 0));
         rectangle.addArea(new AboveLine(0, 0, 0, -1));
-        rectangle.addArea(new AboveLine(-1, -1, 1, 0));
-        rectangle.addArea(new AboveLine(-1, -1, 0, 1));
+        rectangle.addArea(new AboveLine(-0.5, -1, 1, 0));
+        rectangle.addArea(new AboveLine(-0.5, -1, 0, 1));
         OrArea orArea = new OrArea(new ArrayList<>());
         orArea.addArea(quarterCircle);
         orArea.addArea(lowerTriangle);
@@ -43,6 +43,10 @@ public class PointService {
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public List<Point> findAll() {
         return pointRepository.findAll();
+    }
+
+    public List<Point> findByUserId(Long userId) {
+        return pointRepository.findByUserId(userId);
     }
 
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -64,6 +68,12 @@ public class PointService {
         }
         if (point.getR() < -4 || point.getR() > 4) {
             throw new WebApplicationException("R должен быть от -4 до 4", 400);
+        }
+
+        if (point.getR() < 0) {
+            point.setR(-point.getR());
+            point.setX(-point.getX());
+            point.setY(-point.getY());
         }
 
         point.setHit(area.hit(point));

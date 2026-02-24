@@ -1,28 +1,38 @@
 package me.andrey20005.web4.util;
 
-import java.util.Date;
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
+import java.util.Date;
+
+import io.jsonwebtoken.*;
+
+import javax.crypto.SecretKey;
 
 public class JwtUtil {
 
     public static String generateToken(Long userId, String username, String secretKey) {
         Date now = new Date();
-        Date expiry = new Date(now.getTime() + 3600000); // 1 час
+        Date expiry = new Date(now.getTime() + 3600000);
+
+        SecretKey key = Keys.hmacShaKeyFor(secretKey.getBytes());
 
         return Jwts.builder()
-                .setSubject(String.valueOf(userId))
+                .subject(String.valueOf(userId))
                 .claim("userId", userId)
                 .claim("username", username)
-                .setIssuedAt(now)
-                .setExpiration(expiry)
-                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .issuedAt(now)
+                .expiration(expiry)
+                .signWith(key)
                 .compact();
     }
 
     public static Claims validateToken(String token, String secretKey) {
+        SecretKey key = Keys.hmacShaKeyFor(secretKey.getBytes());
+
         return Jwts.parser()
-                .setSigningKey(secretKey)
-                .parseClaimsJws(token)
-                .getBody();
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 }

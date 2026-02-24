@@ -17,6 +17,15 @@ public class PointRepository {
                 .getResultList();
     }
 
+    public List<Point> findByUserId(Long userId) {
+        System.out.println("вызов findByUserId");
+        return em.createQuery(
+                        "SELECT p FROM Point p WHERE p.userId = :userId ORDER BY p.createdAt DESC",
+                        Point.class)
+                .setParameter("userId", userId)
+                .getResultList();
+    }
+
     public Point findById(Long id) {
         return em.find(Point.class, id);
     }

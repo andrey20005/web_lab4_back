@@ -4,14 +4,14 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
+import jakarta.ws.rs.core.SecurityContext;
 import jakarta.ws.rs.ext.Provider;
 import jakarta.ws.rs.core.Response;
 import jakarta.annotation.Priority;
 
 import me.andrey20005.web4.util.JwtUtil;
 
-import java.io.IOException;
-
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
@@ -23,10 +23,15 @@ public class JwtAuthenticationFilter implements ContainerRequestFilter {
             "/auth/login"
             , "/auth/register"
             , "/time"
-            , "/points"
+//            , "/points"
+            , "/auth/login"
+            , "/auth/register"
     );
 
-    private static final String SECRET_KEY = "your-secret-key-change-in-production";
+    public static final String SECRET_KEY = "secret-key-jhgbhgugbijhbjuhguhgujhuhgbuhujhjhhgbuyguhgbuyguyhgbuyhgb6546561616516516";
+    static {
+        System.out.println(SECRET_KEY);
+    }
 
     @Override
     public void filter(ContainerRequestContext request) {
@@ -41,7 +46,7 @@ public class JwtAuthenticationFilter implements ContainerRequestFilter {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             request.abortWith(Response
                     .status(401)
-                    .entity(Map.of("error", "Authorization header missing", "path", path))
+                    .entity(Map.of("error", "Authorization header missing"))
                     .build());
             return;
         }
@@ -50,13 +55,30 @@ public class JwtAuthenticationFilter implements ContainerRequestFilter {
 
         try {
             Claims claims = JwtUtil.validateToken(token, SECRET_KEY);
-
             Long userId = claims.get("userId", Long.class);
             String username = claims.get("username", String.class);
 
-            request.setProperty("userId", userId);
-            request.setProperty("username", username);
+            request.setSecurityContext(new SecurityContext() {
+                @Override
+                public Principal getUserPrincipal() {
+                    return () -> String.valueOf(userId);
+                }
 
+                @Override
+                public boolean isUserInRole(String role) {
+                    return false;
+                }
+
+                @Override
+                public boolean isSecure() {
+                    return false;
+                }
+
+                @Override
+                public String getAuthenticationScheme() {
+                    return "Bearer";
+                }
+            });
         } catch (JwtException e) {
             request.abortWith(Response
                     .status(401)
